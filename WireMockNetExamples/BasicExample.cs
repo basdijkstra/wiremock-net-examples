@@ -28,7 +28,7 @@ namespace WireMockNetExamples
             server = WireMockServer.Start(9876);
         }
 
-        public void CreateHelloWorldStub()
+        private void CreateHelloWorldStub()
         {
             server.Given(
                 Request.Create().WithPath("/hello-world").UsingGet()
