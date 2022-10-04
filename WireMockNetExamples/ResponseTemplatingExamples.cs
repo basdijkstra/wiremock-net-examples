@@ -1,14 +1,13 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RestSharp;
 using System.Net;
-using WireMock.Matchers;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
 using WireMock.Server;
 
 namespace WireMockNetExamples
 {
-    [TestFixture]
+    [TestClass]
     public class ResponseTemplatingExamples
     {
         private WireMockServer server;
@@ -17,13 +16,13 @@ namespace WireMockNetExamples
 
         private const string BASE_URL = "http://localhost:9876";
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetupRestSharpClient()
         {
             client = new RestClient(BASE_URL);
         }
 
-        [SetUp]
+        [TestInitialize]
         public void StartServer()
         {
             server = WireMockServer.Start(9876);
@@ -59,9 +58,10 @@ namespace WireMockNetExamples
             );
         }
 
-        [TestCase(Method.Get, "GET", TestName = "Check that GET method is echoed successfully")]
-        [TestCase(Method.Post, "POST", TestName = "Check that POST method is echoed successfully")]
-        [TestCase(Method.Delete, "DELETE", TestName = "Check that DELETE method is echoed successfully")]
+        [TestMethod]
+        [DataRow(Method.Get, "GET")]
+        [DataRow(Method.Post, "POST")]
+        [DataRow(Method.Delete, "DELETE")]
         public async Task TestStubEchoHttpMethod(Method method, string expectedResponseMethod)
         {
             CreateStubEchoHttpMethod();
@@ -70,12 +70,13 @@ namespace WireMockNetExamples
 
             RestResponse response = await client.ExecuteAsync(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(response.Content, Is.EqualTo($"HTTP method used was {expectedResponseMethod}"));
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual($"HTTP method used was {expectedResponseMethod}", response.Content);
         }
 
-        [TestCase("Pillars of the Earth", "Ken Follett", TestName = "Check for Pillars of the Earth")]
-        [TestCase("The Secret History", "Donna Tartt", TestName = "Check for The Secret History")]
+        [TestMethod]
+        [DataRow("Pillars of the Earth", "Ken Follett")]
+        [DataRow("The Secret History", "Donna Tartt")]
         public async Task TestStubEchoRequestJSONBodyElementValue(string title, string author)
         {
             CreateStubEchoJsonRequestElement();
@@ -95,11 +96,11 @@ namespace WireMockNetExamples
 
             RestResponse response = await client.ExecuteAsync(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(response.Content, Is.EqualTo($"The specified book title is {title}"));
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual($"The specified book title is {title}", response.Content);
         }
 
-        [TearDown]
+        [TestCleanup]
         public void StopServer()
         {
             server.Stop();

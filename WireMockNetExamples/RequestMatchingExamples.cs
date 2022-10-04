@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RestSharp;
 using System.Net;
 using WireMock.Matchers;
@@ -8,7 +8,7 @@ using WireMock.Server;
 
 namespace WireMockNetExamples
 {
-    [TestFixture]
+    [TestClass]
     public class RequestMatchingExamples
     {
         private WireMockServer server;
@@ -17,13 +17,13 @@ namespace WireMockNetExamples
 
         private const string BASE_URL = "http://localhost:9876";
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetupRestSharpClient()
         {
             client = new RestClient(BASE_URL);
         }
 
-        [SetUp]
+        [TestInitialize]
         public void StartServer()
         {
             server = WireMockServer.Start(9876);
@@ -61,7 +61,7 @@ namespace WireMockNetExamples
             );
         }
 
-        [Test]
+        [TestMethod]
         public async Task TestStubHeaderMatching()
         {
             CreateStubHeaderMatching();
@@ -72,11 +72,11 @@ namespace WireMockNetExamples
 
             RestResponse response = await client.ExecuteAsync(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(response.Content, Is.EqualTo("Header matching successful"));
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual("Header matching successful", response.Content);
         }
 
-        [Test]
+        [TestMethod]
         public async Task TestStubRequestBodyMatching()
         {
             CreateStubRequestBodyMatching();
@@ -94,10 +94,10 @@ namespace WireMockNetExamples
 
             RestResponse response = await client.ExecuteAsync(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
         }
 
-        [TearDown]
+        [TestCleanup]
         public void StopServer()
         {
             server.Stop();

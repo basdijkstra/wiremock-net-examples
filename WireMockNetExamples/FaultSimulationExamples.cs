@@ -1,6 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using NUnit.Framework;
 using RestSharp;
 using System.Diagnostics;
 using System.Net;
@@ -10,7 +10,7 @@ using WireMock.Server;
 
 namespace WireMockNetExamples
 {
-    [TestFixture]
+    [TestClass]
     public class FaultSimulationExamples
     {
         private WireMockServer server;
@@ -19,13 +19,13 @@ namespace WireMockNetExamples
 
         private const string BASE_URL = "http://localhost:9876";
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetupRestSharpClient()
         {
             client = new RestClient(BASE_URL);
         }
 
-        [SetUp]
+        [TestInitialize]
         public void StartServer()
         {
             server = WireMockServer.Start(9876);
@@ -57,7 +57,7 @@ namespace WireMockNetExamples
             );
         }
 
-        [Test]
+        [TestMethod]
         public async Task TestStubDelay()
         {
             CreateStubReturningDelayedResponse();
@@ -71,11 +71,11 @@ namespace WireMockNetExamples
 
             stopwatch.Stop();
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(stopwatch.ElapsedMilliseconds, Is.GreaterThanOrEqualTo(2000));
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.IsTrue(stopwatch.ElapsedMilliseconds >= 2000);
         }
 
-        [Test]
+        [TestMethod]
         public async Task TestStubFault()
         {
             CreateStubReturningFault();
@@ -84,10 +84,10 @@ namespace WireMockNetExamples
 
             RestResponse response = await client.ExecuteAsync(request);
 
-            Assert.Throws<JsonReaderException>(() => JObject.Parse(response.Content));
+            Assert.ThrowsException<JsonReaderException>(() => JObject.Parse(response.Content));
         }
 
-        [TearDown]
+        [TestCleanup]
         public void StopServer()
         {
             server.Stop();

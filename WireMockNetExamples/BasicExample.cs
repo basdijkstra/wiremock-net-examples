@@ -1,4 +1,4 @@
-﻿using NUnit.Framework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RestSharp;
 using System.Net;
 using WireMock.RequestBuilders;
@@ -7,7 +7,7 @@ using WireMock.Server;
 
 namespace WireMockNetExamples
 {
-    [TestFixture]
+    [TestClass]
     public class BasicExample
     {
         private WireMockServer server;
@@ -16,13 +16,13 @@ namespace WireMockNetExamples
 
         private const string BASE_URL = "http://localhost:9876";
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetupRestSharpClient()
         {
             client = new RestClient(BASE_URL);
         }
 
-        [SetUp]
+        [TestInitialize]
         public void StartServer()
         {
             server = WireMockServer.Start(9876);
@@ -41,7 +41,7 @@ namespace WireMockNetExamples
             );
         }
 
-        [Test]
+        [TestMethod]
         public async Task TestHelloWorldStub()
         {
             CreateHelloWorldStub();
@@ -50,12 +50,12 @@ namespace WireMockNetExamples
 
             RestResponse response = await client.ExecuteAsync(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.OK));
-            Assert.That(response.ContentType, Is.EqualTo("text/plain"));
-            Assert.That(response.Content, Is.EqualTo("Hello, world!"));
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual("text/plain", response.ContentType);
+            Assert.AreEqual("Hello, world!", response.Content);
         }
 
-        [TearDown]
+        [TestCleanup]
         public void StopServer()
         {
             server.Stop();

@@ -1,8 +1,5 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using NUnit.Framework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RestSharp;
-using System.Diagnostics;
 using System.Net;
 using WireMock.RequestBuilders;
 using WireMock.ResponseBuilders;
@@ -10,7 +7,7 @@ using WireMock.Server;
 
 namespace WireMockNetExamples
 {
-    [TestFixture]
+    [TestClass]
     public class StatefulMockExample
     {
         private WireMockServer server;
@@ -19,13 +16,13 @@ namespace WireMockNetExamples
 
         private const string BASE_URL = "http://localhost:9876";
 
-        [OneTimeSetUp]
+        [ClassInitialize]
         public void SetupRestSharpClient()
         {
             client = new RestClient(BASE_URL);
         }
 
-        [SetUp]
+        [TestInitialize]
         public void StartServer()
         {
             server = WireMockServer.Start(9876);
@@ -69,7 +66,7 @@ namespace WireMockNetExamples
             );
         }
 
-        [Test]
+        [TestMethod]
         public async Task TestStatefulStub()
         {
             CreateStatefulStub();
@@ -78,22 +75,22 @@ namespace WireMockNetExamples
 
             RestResponse response = await client.ExecuteAsync(request);
 
-            Assert.That(response.Content, Is.EqualTo("Buy milk"));
+            Assert.AreEqual("Buy milk", response.Content);
 
             request = new RestRequest("/todo/items", Method.Post);
 
             response = await client.ExecuteAsync(request);
 
-            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.AreEqual(HttpStatusCode.Created, response.StatusCode);
 
             request = new RestRequest("/todo/items", Method.Get);
 
             response = await client.ExecuteAsync(request);
 
-            Assert.That(response.Content, Is.EqualTo("Buy milk;Cancel newspaper subscription"));
+            Assert.AreEqual("Buy milk;Cancel newspaper subscription", response.Content);
         }
 
-        [TearDown]
+        [TestCleanup]
         public void StopServer()
         {
             server.Stop();
